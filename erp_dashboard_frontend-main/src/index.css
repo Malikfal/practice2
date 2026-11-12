@@ -1,0 +1,278 @@
+@import 'tailwindcss';
+
+:root {
+  --app-viewport-height: 100dvh;
+  /* Глифы Segoe UI занимают 1.33em: текст с truncate, line-clamp-* или overflow-hidden
+     обрезается при line-height < 1.31, поэтому для него — leading-snug и выше. */
+  font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.app-viewport {
+  height: var(--app-viewport-height);
+}
+
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+      [type='color']
+    ),
+  select,
+  textarea,
+  [contenteditable='true'] {
+    font-size: 16px !important;
+  }
+}
+
+.registration-captcha .smart-captcha,
+.registration-captcha .smart-captcha iframe {
+  max-width: 100%;
+}
+
+/* Compact spacing for reports date-range popup */
+.reports-date-range .rdrMonth {
+  padding: 0 4px 6px !important;
+  width: 246px !important;
+}
+
+.reports-date-range .rdrMonthAndYearWrapper {
+  height: 44px !important;
+  padding-top: 4px !important;
+}
+
+.reports-date-range .rdrWeekDays {
+  padding: 0 4px !important;
+}
+
+.reports-date-range .rdrWeekDay {
+  height: 24px !important;
+  line-height: 24px !important;
+}
+
+.reports-date-range .rdrDay {
+  width: 34px !important;
+  height: 30px !important;
+}
+
+.reports-date-range .rdrDayNumber span {
+  font-size: 12px !important;
+}
+
+.reports-date-range .rdrDayToday .rdrDayNumber span::after {
+  bottom: 2px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: 12px !important;
+  height: 1px !important;
+  margin-left: 0 !important;
+  display: block !important;
+  border-radius: 999px !important;
+  background: #2563eb !important;
+}
+
+.reports-date-range .rdrDayToday .rdrDayNumber span {
+  color: #1e40af !important;
+  font-weight: 600 !important;
+}
+
+.reports-date-range .rdrDayToday:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span,
+.reports-date-range .rdrDayToday:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span,
+.reports-date-range .rdrDayToday:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span,
+.reports-date-range .rdrDayToday:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+  color: #fff !important;
+}
+
+.reports-date-range
+  .rdrDayToday:not(.rdrDayPassive)
+  .rdrInRange
+  ~ .rdrDayNumber
+  span::after,
+.reports-date-range
+  .rdrDayToday:not(.rdrDayPassive)
+  .rdrStartEdge
+  ~ .rdrDayNumber
+  span::after,
+.reports-date-range
+  .rdrDayToday:not(.rdrDayPassive)
+  .rdrEndEdge
+  ~ .rdrDayNumber
+  span::after,
+.reports-date-range
+  .rdrDayToday:not(.rdrDayPassive)
+  .rdrSelected
+  ~ .rdrDayNumber
+  span::after {
+  background: #fff !important;
+}
+
+.reports-date-range .rdrMonths {
+  gap: 4px !important;
+}
+
+.reports-date-range .rdrDateDisplayWrapper {
+  padding: 4px !important;
+}
+
+.reports-date-range .rdrDateDisplayItem {
+  margin-right: 4px !important;
+}
+
+.reports-date-range .rdrDefinedRangesWrapper {
+  width: 170px !important;
+}
+
+@media (max-width: 767px) {
+  .reports-date-range,
+  .reports-date-range .rdrCalendarWrapper,
+  .reports-date-range .rdrMonths,
+  .reports-date-range .rdrMonth {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .reports-date-range {
+    display: block !important;
+  }
+
+  .reports-date-range .rdrMonth:nth-child(n + 2),
+  .reports-date-range .rdrInputRanges {
+    display: none !important;
+  }
+
+  /* Пресеты периода на мобильных — горизонтальная лента над календарём. */
+  /* contain: лента не растягивает всплывающий календарь, а прокручивается внутри. */
+  .reports-date-range .rdrDefinedRangesWrapper {
+    width: 100% !important;
+    contain: inline-size;
+    border-right: 0 !important;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .reports-date-range .rdrStaticRanges {
+    flex-direction: row !important;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px;
+    scrollbar-width: none;
+  }
+
+  .reports-date-range .rdrStaticRange {
+    flex: none;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  .reports-date-range .rdrStaticRangeLabel {
+    padding: 6px 12px !important;
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  .reports-date-range .rdrStaticRangeSelected {
+    border-color: #2d6ff7 !important;
+    background: #edf3ff;
+  }
+
+  .reports-date-range .rdrMonths {
+    display: block !important;
+  }
+
+  .reports-date-range .rdrDay {
+    width: calc(100% / 7) !important;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #tasks-report-table,
+  #tasks-report-table * {
+    visibility: visible !important;
+  }
+
+  #tasks-report-table {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  #tasks-report-table a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
+
+.task-description-prose p {
+  margin: 0.35rem 0;
+}
+.task-description-prose p:first-child {
+  margin-top: 0;
+}
+.task-description-prose p:last-child {
+  margin-bottom: 0;
+}
+.task-description-prose h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.4em 0;
+}
+.task-description-prose h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0.4em 0;
+}
+.task-description-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.task-description-prose ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+.task-description-prose blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding-left: 0.75rem;
+  color: #475569;
+  margin: 0.4em 0;
+}
+
+.task-description-prose a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.task-description-prose img {
+  display: block;
+  max-width: 100%;
+  max-height: 500px;
+  margin: 0.5rem 0;
+  border-radius: 0.5rem;
+  cursor: zoom-in;
+}
+
+.public-page-font {
+  font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}

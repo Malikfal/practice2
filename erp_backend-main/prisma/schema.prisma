@@ -1,0 +1,1041 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/db/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  createdAt                                                DateTime                          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                                                DateTime                          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  email                                                    String                            @unique @db.VarChar(255)
+  name                                                     String                            @db.VarChar(255)
+  passwordHash                                             String                            @map("password_hash") @db.VarChar(255)
+  status                                                   UserStatus                        @default(ACTIVE)
+  id                                                       String                            @id @default(uuid()) @db.Uuid
+  lastName                                                 String?                           @map("last_name") @db.VarChar(255)
+  company_id                                               String?                           @ignore @db.Uuid
+  position                                                 String?                           @ignore @db.VarChar(255)
+  birthday                                                 DateTime?                         @ignore @db.Date
+  phone                                                    String?                           @ignore @db.VarChar(255)
+  socials                                                  Json?                             @ignore @db.Json
+  skills                                                   String?                           @ignore
+  roleId                                                   BigInt?                           @map("role_id")
+  bank_details                                             bank_details?                     @ignore
+  companies_companies_owner_user_idTousers                 Company[]                         @relation("companies_owner_user_idTousers") @ignore
+  employee_documents_employee_documents_employee_idTousers employee_documents[]              @relation("employee_documents_employee_idTousers") @ignore
+  employee_documents_employee_documents_uploaded_byTousers employee_documents[]              @relation("employee_documents_uploaded_byTousers") @ignore
+  employee_rates_employee_rates_changed_byTousers          employee_rates[]                  @relation("employee_rates_changed_byTousers") @ignore
+  employee_rates_employee_rates_employee_idTousers         employee_rates[]                  @relation("employee_rates_employee_idTousers") @ignore
+  employee_skills                                          employee_skills[]                 @ignore
+  finances                                                 finance[]                         @ignore
+  knowledge_base_article_accesses                          knowledge_base_article_accesses[] @ignore
+  knowledge_base_articles                                  knowledge_base_articles[]         @ignore
+  knowledge_base_documents                                 knowledge_base_documents[]        @ignore
+  knowledge_base_folder_accesses                           knowledge_base_folder_accesses[]  @ignore
+  project_documents                                        project_documents[]               @ignore
+  projectMemberships                                       ProjectMember[]
+  project_note_accesses                                    project_note_accesses[]           @ignore
+  project_note_images                                      project_note_images[]             @ignore
+  project_notes_project_notes_author_idTousers             project_notes[]                   @relation("project_notes_author_idTousers") @ignore
+  project_notes_project_notes_changed_byTousers            project_notes[]                   @relation("project_notes_changed_byTousers") @ignore
+  project_rates                                            project_rates[]                   @ignore
+  createdProjects                                          Project[]                         @relation("ProjectCreatedBy")
+  refreshSessions                                          RefreshSessions[]
+  task_attachments                                         task_attachments[]                @ignore
+  task_comment_attachments                                 task_comment_attachments[]        @ignore
+  task_comments                                            task_comments[]                   @ignore
+  task_description_images                                  task_description_images[]         @ignore
+  taskUsers                                                TaskUsers[]
+  createdTasks                                             Task[]
+  template_members                                         template_members[]                @ignore
+  templates_templates_created_by_idTousers                 templates[]                       @relation("templates_created_by_idTousers") @ignore
+  templates_templates_manager_idTousers                    templates[]                       @relation("templates_manager_idTousers") @ignore
+  user_pinned_project_notes                                user_pinned_project_notes[]       @ignore
+  user_pinned_projects                                     user_pinned_projects[]            @ignore
+  user_pinned_templates                                    user_pinned_templates[]           @ignore
+  companies_users_company_idTocompanies                    Company?                          @relation("users_company_idTocompanies", fields: [company_id], references: [id], onUpdate: NoAction, map: "users_company_id_foreign") @ignore
+  role                                                     Roles?                            @relation(fields: [roleId], references: [id], onUpdate: NoAction, map: "users_role_id_foreign")
+  work_segments_work_segments_created_byTousers            WorkSegment[]                     @relation("work_segments_created_byTousers")
+  workSegments                                             WorkSegment[]
+
+  @@index([company_id], map: "users_company_id_index")
+  @@index([roleId], map: "users_role_id_index")
+  @@map("users")
+}
+
+model Project {
+  createdAt                DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  name                     String                     @db.VarChar(255)
+  description              String?
+  id                       String                     @id @default(uuid()) @db.Uuid
+  createdById              String                     @map("created_by_id") @db.Uuid
+  status                   ProjectStatus              @default(ACTIVE)
+  companyId                String?                    @map("company_id") @db.Uuid
+  client_id                String?                    @ignore @db.Uuid
+  starts_at                DateTime?                  @ignore @db.Timestamptz(0)
+  ends_at                  DateTime?                  @ignore @db.Timestamptz(0)
+  budget                   BigInt?                    @ignore
+  manager_payment_method   String                     @default("ACCRUE_ALL") @ignore @db.VarChar(255)
+  finance                  finance[]                  @ignore
+  project_documents        project_documents[]        @ignore
+  members                  ProjectMember[]
+  project_notes            project_notes[]            @ignore
+  project_rates            project_rates[]            @ignore
+  project_tags             project_tags[]             @ignore
+  clients                  clients?                   @relation(fields: [client_id], references: [id], onUpdate: NoAction, map: "projects_client_id_foreign") @ignore
+  company                  Company?                   @relation(fields: [companyId], references: [id], onUpdate: NoAction, map: "projects_company_id_foreign")
+  createdBy                User                       @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  task_comment_attachments task_comment_attachments[] @ignore
+  taskStatusColumns        TaskStatusColumns[]
+  tasks                    Task[]
+  user_pinned_projects     user_pinned_projects[]     @ignore
+
+  @@index([companyId, client_id], map: "projects_company_id_client_id_index")
+  @@index([companyId], map: "projects_company_id_index")
+  @@index([starts_at, ends_at], map: "projects_starts_at_ends_at_index")
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String  @id @default(uuid()) @db.Uuid
+  projectId String  @map("project_id") @db.Uuid
+  userId    String  @map("user_id") @db.Uuid
+  is_pm     Boolean @default(false) @ignore
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Task {
+  createdAt                DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  title                    String                     @db.VarChar(255)
+  id                       String                     @id @default(uuid()) @db.Uuid
+  projectId                String                     @map("project_id") @db.Uuid
+  status                   String                     @default("TODO") @db.VarChar(20)
+  position                 Float                      @default(0) @ignore
+  description              String?
+  priority                 String?
+  estimation               Int?
+  taskStatusColumnId       String?                    @map("task_status_column_id") @db.Uuid
+  createdById              String?                    @map("created_by_id") @db.Uuid
+  parentTaskId             String?                    @map("parent_task_id") @ignore @db.Uuid
+  deadline                 DateTime?                  @ignore @db.Timestamp(0)
+  isDraft                  Boolean                    @default(false) @map("is_draft")
+  publishedAt              DateTime?                  @map("published_at") @db.Timestamp(0)
+  task_attachments         task_attachments[]         @ignore
+  task_comment_attachments task_comment_attachments[] @ignore
+  task_comments            task_comments[]            @ignore
+  task_description_images  task_description_images[]  @ignore
+  taskUsers                TaskUsers[]
+  creator                  User?                      @relation(fields: [createdById], references: [id], onUpdate: NoAction, map: "tasks_created_by_id_foreign")
+  parentTask               Task?                      @relation("tasksTotasks", fields: [parentTaskId], references: [id], onUpdate: NoAction, map: "tasks_parent_task_id_foreign") @ignore
+  subTasks                 Task[]                     @relation("tasksTotasks") @ignore
+  project                  Project                    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskStatusColumns        TaskStatusColumns?         @relation(fields: [taskStatusColumnId], references: [id], onUpdate: NoAction, map: "tasks_task_status_column_id_foreign")
+  workSegments             WorkSegment[]
+
+  @@index([projectId])
+  @@index([projectId, taskStatusColumnId], map: "tasks_project_id_task_status_column_id_index")
+  @@index([projectId, parentTaskId], map: "tasks_project_id_parent_task_id_index")
+  @@index([deadline], map: "tasks_deadline_index")
+  @@index([projectId, isDraft], map: "tasks_project_id_is_draft_index")
+  @@map("tasks")
+}
+
+model WorkSegment {
+  id                 String  @id @default(uuid())
+  startedAt          Int     @map("started_at")
+  endedAt            Int     @map("ended_at")
+  taskId             String  @map("task_id") @db.Uuid
+  userId             String  @map("user_id") @db.Uuid
+  note               String?
+  createdBy          String? @map("created_by") @ignore @db.Uuid
+  workSegmentCreator User?   @relation("work_segments_created_byTousers", fields: [createdBy], references: [id], onUpdate: NoAction, map: "work_segments_created_by_foreign") @ignore
+  task               Task    @relation(fields: [taskId], references: [id])
+  user               User    @relation(fields: [userId], references: [id])
+
+  @@index([taskId, startedAt])
+  @@index([userId], map: "work_segments_user_id_index")
+  @@index([userId])
+  @@index([startedAt, endedAt])
+  @@map("work_segments")
+}
+
+model IdempotencyKey {
+  key          String    @id @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+  jobStatus    JobStatus @default(IN_PROGRESS) @map("job_status")
+  statusCode   Int?      @map("status_code")
+  responseBody Json?     @map("response_body") @db.Json
+
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement())
+  migration String @db.VarChar(255)
+  batch     Int
+
+  @@ignore
+}
+
+model TaskUsers {
+  taskId String @map("task_id") @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@index([userId], map: "task_users_user_id_index")
+  @@map("task_users")
+}
+
+model model_has_permissions {
+  permission_id BigInt
+  model_type    String      @db.VarChar(255)
+  model_id      String      @db.Uuid
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "model_has_permissions_permission_id_foreign")
+
+  @@id([permission_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_permissions_model_id_model_type_index")
+  @@ignore
+}
+
+model model_has_roles {
+  role_id    BigInt
+  model_type String @db.VarChar(255)
+  model_id   String @db.Uuid
+  roles      Roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "model_has_roles_role_id_foreign")
+
+  @@id([role_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
+  @@ignore
+}
+
+model permissions {
+  id                      BigInt                    @id @default(autoincrement())
+  name                    String                    @db.VarChar(255)
+  guard_name              String                    @db.VarChar(255)
+  created_at              DateTime?                 @db.Timestamp(0)
+  updated_at              DateTime?                 @db.Timestamp(0)
+  model_has_permissions   model_has_permissions[]
+  role_has_permissions    role_has_permissions[]
+  user_permission_denials user_permission_denials[]
+
+  @@unique([name, guard_name], map: "permissions_name_guard_name_unique")
+  @@ignore
+}
+
+model role_has_permissions {
+  permission_id BigInt
+  role_id       BigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "role_has_permissions_permission_id_foreign")
+  roles         Roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "role_has_permissions_role_id_foreign")
+
+  @@id([permission_id, role_id])
+  @@ignore
+}
+
+model Roles {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  guardName            String                 @map("guard_name") @db.VarChar(255)
+  createdAt            DateTime?              @map("created_at") @db.Timestamp(0)
+  updatedAt            DateTime?              @map("updated_at") @db.Timestamp(0)
+  companyId            String?                @map("company_id") @db.Uuid
+  displayName          String?                @map("display_name") @db.VarChar(120)
+  model_has_roles      model_has_roles[]      @ignore
+  role_has_permissions role_has_permissions[] @ignore
+  users                User[]
+
+  @@unique([name, guardName, companyId], map: "roles_name_guard_name_company_id_unique", where: raw("(company_id IS NOT NULL)"))
+  @@unique([name, guardName], map: "roles_name_guard_name_null_company_unique", where: raw("(company_id IS NULL)"))
+  @@index([companyId], map: "roles_company_id_index")
+  @@map("roles")
+}
+
+model cache {
+  key        String @id @db.VarChar(255)
+  value      String
+  expiration BigInt
+
+  @@index([expiration], map: "cache_expiration_index")
+  @@ignore
+}
+
+model cache_locks {
+  key        String @id @db.VarChar(255)
+  owner      String @db.VarChar(255)
+  expiration BigInt
+
+  @@index([expiration], map: "cache_locks_expiration_index")
+  @@ignore
+}
+
+model Company {
+  id                                                                           String                            @id @db.Uuid
+  name                                                                         String                            @db.VarChar(255)
+  status                                                                       String                            @default("ACTIVE") @db.VarChar(32)
+  owner_user_id                                                                String?                           @ignore @db.Uuid
+  blockedAt                                                                    DateTime?                         @map("blocked_at") @ignore @db.Timestamp(0)
+  createdAt                                                                    DateTime?                         @map("created_at") @ignore @db.Timestamp(0)
+  updatedAt                                                                    DateTime?                         @map("updated_at") @ignore @db.Timestamp(0)
+  trackerDefaultTaskStatusName                                                 String?                           @map("tracker_default_task_status_name") @db.VarChar(255)
+  default_salary_finance_article_id                                            String?                           @ignore @db.Uuid
+  clients                                                                      clients[]                         @ignore
+  finance_article_companies_default_salary_finance_article_idTofinance_article finance_article?                  @relation("companies_default_salary_finance_article_idTofinance_article", fields: [default_salary_finance_article_id], references: [id], onUpdate: NoAction, map: "companies_default_salary_finance_article_id_foreign") @ignore
+  users_companies_owner_user_idTousers                                         User?                             @relation("companies_owner_user_idTousers", fields: [owner_user_id], references: [id], onUpdate: NoAction, map: "companies_owner_user_id_foreign") @ignore
+  employee_documents                                                           employee_documents[]              @ignore
+  finance                                                                      finance[]                         @ignore
+  finance_article                                                              finance_article[]                 @ignore
+  knowledge_base_article_accesses                                              knowledge_base_article_accesses[] @ignore
+  knowledge_base_articles                                                      knowledge_base_articles[]         @ignore
+  knowledge_base_documents                                                     knowledge_base_documents[]        @ignore
+  knowledge_base_folder_accesses                                               knowledge_base_folder_accesses[]  @ignore
+  knowledge_base_folders                                                       knowledge_base_folders[]          @ignore
+  project_documents                                                            project_documents[]               @ignore
+  project_note_accesses                                                        project_note_accesses[]           @ignore
+  project_note_images                                                          project_note_images[]             @ignore
+  project_notes                                                                project_notes[]                   @ignore
+  projects                                                                     Project[]
+  skills                                                                       skills[]                          @ignore
+  tags                                                                         tags[]                            @ignore
+  task_attachments                                                             task_attachments[]                @ignore
+  task_description_images                                                      task_description_images[]         @ignore
+  taskStatusColumns                                                            TaskStatusColumns[]
+  templates                                                                    templates[]                       @ignore
+  users_users_company_idTocompanies                                            User[]                            @relation("users_company_idTocompanies") @ignore
+
+  @@map("companies")
+}
+
+model RefreshSessions {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @unique(map: "refresh_sessions_token_hash_unique") @map("token_hash") @db.VarChar(255)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamp(0)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamp(0)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamp(0)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "refresh_sessions_user_id_foreign")
+
+  @@index([revokedAt], map: "refresh_sessions_revoked_at_index")
+  @@index([userId, expiresAt], map: "refresh_sessions_user_id_expires_at_index")
+  @@map("refresh_sessions")
+}
+
+model sessions {
+  id            String  @id @db.VarChar(255)
+  user_id       String? @db.Uuid
+  ip_address    String? @db.VarChar(45)
+  user_agent    String?
+  payload       String
+  last_activity Int
+
+  @@index([last_activity], map: "sessions_last_activity_index")
+  @@index([user_id], map: "sessions_user_id_index")
+  @@ignore
+}
+
+model task_comment_attachments {
+  id            String        @id @db.Uuid
+  comment_id    String        @db.Uuid
+  project_id    String        @db.Uuid
+  task_id       String        @db.Uuid
+  path          String        @db.VarChar(1024)
+  original_name String        @db.VarChar(255)
+  mime_type     String?       @db.VarChar(255)
+  uploaded_by   String?       @db.Uuid
+  created_at    DateTime?     @db.Timestamp(0)
+  updated_at    DateTime?     @db.Timestamp(0)
+  task_comments task_comments @relation(fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_comment_attachments_comment_id_foreign")
+  projects      Project       @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_comment_attachments_project_id_foreign")
+  tasks         Task          @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_comment_attachments_task_id_foreign")
+  users         User?         @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "task_comment_attachments_uploaded_by_foreign")
+
+  @@index([task_id, created_at], map: "task_comment_attachments_task_created_idx")
+  @@ignore
+}
+
+model task_comments {
+  id                       String                     @id @db.Uuid
+  task_id                  String                     @db.Uuid
+  author_id                String                     @db.Uuid
+  text                     String?
+  created_at               DateTime?                  @db.Timestamp(0)
+  updated_at               DateTime?                  @db.Timestamp(0)
+  task_comment_attachments task_comment_attachments[]
+  users                    User                       @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_comments_author_id_foreign")
+  tasks                    Task                       @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_comments_task_id_foreign")
+
+  @@index([task_id, created_at], map: "task_comments_task_created_idx")
+  @@ignore
+}
+
+model bank_details {
+  id          String    @id @db.Uuid
+  employee_id String    @unique(map: "bank_details_employee_id_unique") @db.Uuid
+  details     String
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  users       User      @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "bank_details_employee_id_foreign")
+
+  @@ignore
+}
+
+model clients {
+  id                    String                  @id @db.Uuid
+  company_id            String                  @db.Uuid
+  name                  String                  @db.VarChar(255)
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  description           String?
+  client_contacts       client_contacts[]
+  client_legal_entities client_legal_entities[]
+  companies             Company                 @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "clients_company_id_foreign")
+  projects              Project[]
+
+  @@index([company_id, name], map: "clients_company_id_name_index")
+  @@ignore
+}
+
+model employee_documents {
+  id                                          String    @id @db.Uuid
+  company_id                                  String    @db.Uuid
+  employee_id                                 String    @db.Uuid
+  disk                                        String    @default("employee_documents") @db.VarChar(64)
+  path                                        String    @db.VarChar(1024)
+  original_name                               String    @db.VarChar(255)
+  mime_type                                   String?   @db.VarChar(255)
+  size                                        BigInt    @default(0)
+  uploaded_by                                 String?   @db.Uuid
+  created_at                                  DateTime? @db.Timestamp(0)
+  updated_at                                  DateTime? @db.Timestamp(0)
+  companies                                   Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "employee_documents_company_id_foreign")
+  users_employee_documents_employee_idTousers User      @relation("employee_documents_employee_idTousers", fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "employee_documents_employee_id_foreign")
+  users_employee_documents_uploaded_byTousers User?     @relation("employee_documents_uploaded_byTousers", fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "employee_documents_uploaded_by_foreign")
+
+  @@index([company_id, created_at], map: "employee_documents_company_created_idx")
+  @@index([employee_id, created_at], map: "employee_documents_employee_created_idx")
+  @@ignore
+}
+
+model employee_rates {
+  id                                      String    @id @db.Uuid
+  employee_id                             String    @db.Uuid
+  salary                                  BigInt?
+  hourly_rate                             BigInt?
+  supervised_hourly_rate                  BigInt?
+  effective_from                          DateTime  @db.Date
+  changed_by                              String    @db.Uuid
+  created_at                              DateTime? @db.Timestamp(0)
+  updated_at                              DateTime? @db.Timestamp(0)
+  users_employee_rates_changed_byTousers  User      @relation("employee_rates_changed_byTousers", fields: [changed_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "employee_rates_changed_by_foreign")
+  users_employee_rates_employee_idTousers User      @relation("employee_rates_employee_idTousers", fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "employee_rates_employee_id_foreign")
+
+  @@unique([employee_id, effective_from], map: "employee_rates_employee_id_effective_from_unique")
+  @@index([employee_id, effective_from], map: "employee_rates_employee_id_effective_from_index")
+  @@ignore
+}
+
+model knowledge_base_articles {
+  id                              String                            @id @db.Uuid
+  company_id                      String                            @db.Uuid
+  folder_id                       String?                           @db.Uuid
+  author_id                       String                            @db.Uuid
+  title                           String                            @db.VarChar(255)
+  content                         String
+  is_draft                        Boolean                           @default(true)
+  is_archive                      Boolean                           @default(false)
+  is_pinned                       Boolean                           @default(false)
+  created_at                      DateTime?                         @db.Timestamp(0)
+  updated_at                      DateTime?                         @db.Timestamp(0)
+  knowledge_base_article_accesses knowledge_base_article_accesses[]
+  users                           User                              @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_articles_author_id_foreign")
+  companies                       Company                           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_articles_company_id_foreign")
+  knowledge_base_folders          knowledge_base_folders?           @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_articles_folder_id_foreign")
+  knowledge_base_documents        knowledge_base_documents[]
+
+  @@ignore
+}
+
+model knowledge_base_documents {
+  id                      String                  @id @db.Uuid
+  company_id              String                  @db.Uuid
+  article_id              String                  @db.Uuid
+  disk                    String                  @default("knowledge_base") @db.VarChar(64)
+  path                    String                  @db.VarChar(1024)
+  original_name           String                  @db.VarChar(255)
+  mime_type               String?                 @db.VarChar(255)
+  size                    BigInt                  @default(0)
+  uploaded_by             String?                 @db.Uuid
+  created_at              DateTime?               @db.Timestamp(0)
+  updated_at              DateTime?               @db.Timestamp(0)
+  knowledge_base_articles knowledge_base_articles @relation(fields: [article_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_documents_article_id_foreign")
+  companies               Company                 @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_documents_company_id_foreign")
+  users                   User?                   @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "knowledge_base_documents_uploaded_by_foreign")
+
+  @@ignore
+}
+
+model knowledge_base_folder_accesses {
+  id                     String                 @id @db.Uuid
+  company_id             String                 @db.Uuid
+  folder_id              String                 @db.Uuid
+  user_id                String?                @db.Uuid
+  role                   String?                @db.VarChar(32)
+  created_at             DateTime?              @db.Timestamp(0)
+  updated_at             DateTime?              @db.Timestamp(0)
+  companies              Company                @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_folder_accesses_company_id_foreign")
+  knowledge_base_folders knowledge_base_folders @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_folder_accesses_folder_id_foreign")
+  users                  User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_folder_accesses_user_id_foreign")
+
+  @@ignore
+}
+
+model knowledge_base_folders {
+  id                             String                           @id @db.Uuid
+  company_id                     String                           @db.Uuid
+  name                           String                           @db.VarChar(255)
+  is_archive                     Boolean                          @default(false)
+  created_at                     DateTime?                        @db.Timestamp(0)
+  updated_at                     DateTime?                        @db.Timestamp(0)
+  knowledge_base_articles        knowledge_base_articles[]
+  knowledge_base_folder_accesses knowledge_base_folder_accesses[]
+  companies                      Company                          @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_folders_company_id_foreign")
+
+  @@ignore
+}
+
+model project_documents {
+  id            String    @id @db.Uuid
+  company_id    String    @db.Uuid
+  project_id    String    @db.Uuid
+  disk          String    @default("project_documents") @db.VarChar(64)
+  path          String    @db.VarChar(1024)
+  original_name String    @db.VarChar(255)
+  mime_type     String?   @db.VarChar(255)
+  size          BigInt    @default(0)
+  uploaded_by   String?   @db.Uuid
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  companies     Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_documents_company_id_foreign")
+  projects      Project   @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_documents_project_id_foreign")
+  users         User?     @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "project_documents_uploaded_by_foreign")
+
+  @@index([company_id, created_at], map: "project_documents_company_created_idx")
+  @@index([project_id, created_at], map: "project_documents_project_created_idx")
+  @@ignore
+}
+
+model project_notes {
+  id                                    String                      @id @db.Uuid
+  company_id                            String                      @db.Uuid
+  project_id                            String                      @db.Uuid
+  author_id                             String?                     @db.Uuid
+  changed_by                            String?                     @db.Uuid
+  title                                 String?                     @db.VarChar(255)
+  content                               String
+  created_at                            DateTime?                   @db.Timestamp(0)
+  updated_at                            DateTime?                   @db.Timestamp(0)
+  visibility                            String                      @default("project") @db.VarChar(32)
+  project_note_accesses                 project_note_accesses[]
+  project_note_images                   project_note_images[]
+  users_project_notes_author_idTousers  User?                       @relation("project_notes_author_idTousers", fields: [author_id], references: [id], onUpdate: NoAction, map: "project_notes_author_id_foreign")
+  users_project_notes_changed_byTousers User?                       @relation("project_notes_changed_byTousers", fields: [changed_by], references: [id], onUpdate: NoAction, map: "project_notes_changed_by_foreign")
+  companies                             Company                     @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_notes_company_id_foreign")
+  projects                              Project                     @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_notes_project_id_foreign")
+  user_pinned_project_notes             user_pinned_project_notes[]
+
+  @@index([company_id, created_at], map: "project_notes_company_created_idx")
+  @@index([project_id, created_at], map: "project_notes_project_created_idx")
+  @@ignore
+}
+
+model project_rates {
+  id             String    @id @db.Uuid
+  project_id     String    @db.Uuid
+  rate           BigInt?
+  vat            BigInt?
+  effective_from DateTime  @db.Date
+  changed_by     String    @db.Uuid
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+  users          User      @relation(fields: [changed_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "project_rates_changed_by_foreign")
+  projects       Project   @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_rates_project_id_foreign")
+
+  @@unique([project_id, effective_from], map: "project_rates_project_id_effective_from_unique")
+  @@index([project_id, effective_from], map: "project_rates_project_id_effective_from_index")
+  @@ignore
+}
+
+model project_tags {
+  id         BigInt    @id @default(autoincrement())
+  project_id String    @db.Uuid
+  tag_id     String    @db.Uuid
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  projects   Project   @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_tags_project_id_foreign")
+  tags       tags      @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_tags_tag_id_foreign")
+
+  @@unique([project_id, tag_id], map: "project_tags_project_id_tag_id_unique")
+  @@index([project_id, tag_id], map: "project_tags_project_id_tag_id_index")
+  @@ignore
+}
+
+model tags {
+  id              String         @id @db.Uuid
+  company_id      String         @db.Uuid
+  name            String         @db.VarChar(255)
+  normalized_name String         @db.VarChar(255)
+  created_at      DateTime?      @db.Timestamp(0)
+  updated_at      DateTime?      @db.Timestamp(0)
+  project_tags    project_tags[]
+  companies       Company        @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tags_company_id_foreign")
+
+  @@unique([company_id, normalized_name], map: "tags_company_id_normalized_name_unique")
+  @@index([company_id, name], map: "tags_company_id_name_index")
+  @@ignore
+}
+
+model template_members {
+  id          String    @id @db.Uuid
+  template_id String    @db.Uuid
+  user_id     String    @db.Uuid
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  templates   templates @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "template_members_template_id_foreign")
+  users       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "template_members_user_id_foreign")
+
+  @@unique([template_id, user_id], map: "template_members_template_id_user_id_unique")
+  @@index([user_id], map: "template_members_user_id_index")
+  @@ignore
+}
+
+model templates {
+  id                                   String                         @id @db.Uuid
+  company_id                           String                         @db.Uuid
+  name                                 String                         @db.VarChar(255)
+  manager_id                           String?                        @db.Uuid
+  created_by_id                        String?                        @db.Uuid
+  created_at                           DateTime?                      @db.Timestamp(0)
+  updated_at                           DateTime?                      @db.Timestamp(0)
+  is_default                           Boolean                        @default(false)
+  template_members                     template_members[]
+  template_task_status_columns         template_task_status_columns[]
+  companies                            Company                        @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "templates_company_id_foreign")
+  users_templates_created_by_idTousers User?                          @relation("templates_created_by_idTousers", fields: [created_by_id], references: [id], onUpdate: NoAction, map: "templates_created_by_id_foreign")
+  users_templates_manager_idTousers    User?                          @relation("templates_manager_idTousers", fields: [manager_id], references: [id], onUpdate: NoAction, map: "templates_manager_id_foreign")
+  user_pinned_templates                user_pinned_templates[]
+
+  @@ignore
+}
+
+model user_pinned_project_notes {
+  id              BigInt        @id @default(autoincrement())
+  user_id         String        @db.Uuid
+  project_note_id String        @db.Uuid
+  created_at      DateTime?     @db.Timestamp(0)
+  updated_at      DateTime?     @db.Timestamp(0)
+  project_notes   project_notes @relation(fields: [project_note_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_pinned_project_notes_project_note_id_foreign")
+  users           User          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_pinned_project_notes_user_id_foreign")
+
+  @@unique([user_id, project_note_id], map: "user_pinned_project_notes_user_id_project_note_id_unique")
+  @@index([user_id, created_at], map: "user_pinned_project_notes_user_id_created_at_index")
+  @@ignore
+}
+
+model user_pinned_projects {
+  id         BigInt    @id @default(autoincrement())
+  user_id    String    @db.Uuid
+  project_id String    @db.Uuid
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  projects   Project   @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_pinned_projects_project_id_foreign")
+  users      User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_pinned_projects_user_id_foreign")
+
+  @@unique([user_id, project_id], map: "user_pinned_projects_user_id_project_id_unique")
+  @@index([user_id, created_at], map: "user_pinned_projects_user_id_created_at_index")
+  @@ignore
+}
+
+model user_pinned_templates {
+  id          BigInt    @id @default(autoincrement())
+  user_id     String    @db.Uuid
+  template_id String    @db.Uuid
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  templates   templates @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_pinned_templates_template_id_foreign")
+  users       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_pinned_templates_user_id_foreign")
+
+  @@unique([user_id, template_id], map: "user_pinned_templates_user_id_template_id_unique")
+  @@index([user_id, created_at], map: "user_pinned_templates_user_id_created_at_index")
+  @@ignore
+}
+
+model TaskStatusColumns {
+  id         String    @id @db.Uuid
+  company_id String    @ignore @db.Uuid
+  projectId  String    @map("project_id") @db.Uuid
+  name       String    @db.VarChar(255)
+  slug       String    @db.VarChar(255)
+  color      String?   @db.VarChar(32)
+  position   Int       @default(0)
+  isFinal    Boolean   @default(false) @map("is_final")
+  isDefault  Boolean   @default(false) @map("is_default")
+  createdAt  DateTime? @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamp(0)
+  companies  Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_status_columns_company_id_foreign") @ignore
+  projects   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_status_columns_project_id_foreign")
+  tasks      Task[]
+
+  @@unique([projectId, slug], map: "task_status_columns_project_id_slug_unique")
+  @@index([company_id, projectId], map: "task_status_columns_company_id_project_id_index")
+  @@index([projectId, position], map: "task_status_columns_project_id_position_index")
+  @@map("task_status_columns")
+}
+
+model user_permission_denials {
+  user_id       String      @db.Uuid
+  permission_id BigInt
+  created_at    DateTime?   @db.Timestamp(0)
+  updated_at    DateTime?   @db.Timestamp(0)
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_permission_denials_permission_id_foreign")
+
+  @@id([user_id, permission_id])
+  @@index([user_id], map: "user_permission_denials_user_id_index")
+  @@ignore
+}
+
+model employee_skills {
+  id          BigInt    @id @default(autoincrement())
+  employee_id String    @db.Uuid
+  skill_id    String    @db.Uuid
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  users       User      @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "employee_skills_employee_id_foreign")
+  skills      skills    @relation(fields: [skill_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "employee_skills_skill_id_foreign")
+
+  @@unique([employee_id, skill_id], map: "employee_skills_employee_id_skill_id_unique")
+  @@index([employee_id, skill_id], map: "employee_skills_employee_id_skill_id_index")
+  @@ignore
+}
+
+model skills {
+  id              String            @id @db.Uuid
+  company_id      String            @db.Uuid
+  name            String            @db.VarChar(80)
+  normalized_name String            @db.VarChar(80)
+  created_at      DateTime?         @db.Timestamp(0)
+  updated_at      DateTime?         @db.Timestamp(0)
+  employee_skills employee_skills[]
+  companies       Company           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "skills_company_id_foreign")
+
+  @@unique([company_id, normalized_name], map: "skills_company_id_normalized_name_unique")
+  @@index([company_id, name], map: "skills_company_id_name_index")
+  @@ignore
+}
+
+model task_description_images {
+  id            String    @id @db.Uuid
+  company_id    String    @db.Uuid
+  task_id       String    @db.Uuid
+  disk          String    @default("task_description_images") @db.VarChar(64)
+  path          String    @db.VarChar(1024)
+  original_name String    @db.VarChar(255)
+  mime_type     String?   @db.VarChar(255)
+  size          BigInt    @default(0)
+  uploaded_by   String?   @db.Uuid
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  companies     Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_description_images_company_id_foreign")
+  tasks         Task      @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_description_images_task_id_foreign")
+  users         User?     @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "task_description_images_uploaded_by_foreign")
+
+  @@index([task_id, created_at], map: "task_description_images_task_created_idx")
+  @@ignore
+}
+
+model client_contacts {
+  id          String    @id @db.Uuid
+  client_id   String    @db.Uuid
+  first_name  String    @db.VarChar(255)
+  last_name   String?   @db.VarChar(255)
+  middle_name String?   @db.VarChar(255)
+  email       String?   @db.VarChar(255)
+  phone       String?   @db.VarChar(255)
+  position    String?   @db.VarChar(255)
+  comments    String?
+  payload     Json?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  clients     clients   @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "client_contacts_client_id_foreign")
+
+  @@index([client_id, last_name, first_name], map: "client_contacts_client_id_last_name_first_name_index")
+  @@ignore
+}
+
+model client_legal_entities {
+  id                               String                             @id @db.Uuid
+  client_id                        String                             @db.Uuid
+  name                             String                             @db.VarChar(255)
+  legal_address                    String
+  postal_code                      String                             @db.VarChar(32)
+  inn                              String                             @db.VarChar(32)
+  kpp                              String?                            @db.VarChar(32)
+  ogrn                             String?                            @db.VarChar(32)
+  signer_last_name                 String?                            @db.VarChar(255)
+  signer_first_name                String?                            @db.VarChar(255)
+  signer_middle_name               String?                            @db.VarChar(255)
+  signer_position                  String?                            @db.VarChar(255)
+  phone                            String?                            @db.VarChar(255)
+  email                            String?                            @db.VarChar(255)
+  created_at                       DateTime?                          @db.Timestamp(0)
+  updated_at                       DateTime?                          @db.Timestamp(0)
+  clients                          clients                            @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "client_legal_entities_client_id_foreign")
+  client_legal_entity_bank_details client_legal_entity_bank_details[]
+
+  @@index([client_id, inn], map: "client_legal_entities_client_id_inn_index")
+  @@index([client_id, name], map: "client_legal_entities_client_id_name_index")
+  @@ignore
+}
+
+model client_legal_entity_bank_details {
+  id                     String                @id @db.Uuid
+  client_legal_entity_id String                @db.Uuid
+  checking_account       String                @db.VarChar(64)
+  bank                   String                @db.VarChar(255)
+  bik                    String                @db.VarChar(32)
+  correspondent_account  String                @db.VarChar(64)
+  created_at             DateTime?             @db.Timestamp(0)
+  updated_at             DateTime?             @db.Timestamp(0)
+  client_legal_entities  client_legal_entities @relation(fields: [client_legal_entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "client_legal_entity_bank_details_client_legal_entity_id_foreign")
+
+  @@index([client_legal_entity_id, bank], map: "client_legal_entity_bank_details_client_legal_entity_id_bank_in")
+  @@ignore
+}
+
+model finance {
+  id                 String           @id @db.Uuid
+  company_id         String           @db.Uuid
+  project_id         String?          @db.Uuid
+  finance_article_id String?          @db.Uuid
+  employee_id        String?          @db.Uuid
+  amount             BigInt
+  type               String           @db.VarChar(255)
+  comment            String?
+  dateOfPayment      DateTime         @db.Date
+  created_at         DateTime?        @db.Timestamp(0)
+  updated_at         DateTime?        @db.Timestamp(0)
+  companies          Company          @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "finance_company_id_foreign")
+  users              User?            @relation(fields: [employee_id], references: [id], onUpdate: NoAction, map: "finance_employee_id_foreign")
+  finance_article    finance_article? @relation(fields: [finance_article_id], references: [id], onUpdate: NoAction, map: "finance_finance_article_id_foreign")
+  projects           Project?         @relation(fields: [project_id], references: [id], onUpdate: NoAction, map: "finance_project_id_foreign")
+
+  @@ignore
+}
+
+model finance_article {
+  id                                                                     String            @id @db.Uuid
+  company_id                                                             String            @db.Uuid
+  name                                                                   String            @db.VarChar(255)
+  type                                                                   String            @db.VarChar(255)
+  created_at                                                             DateTime?         @db.Timestamp(0)
+  updated_at                                                             DateTime?         @db.Timestamp(0)
+  parent_id                                                              String?           @db.Uuid
+  distribution_method                                                    String            @default("NONE") @db.VarChar(255)
+  companies_companies_default_salary_finance_article_idTofinance_article Company[]         @relation("companies_default_salary_finance_article_idTofinance_article")
+  finance                                                                finance[]
+  companies                                                              Company           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "finance_article_company_id_foreign")
+  finance_article                                                        finance_article?  @relation("finance_articleTofinance_article", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "finance_article_parent_id_foreign")
+  other_finance_article                                                  finance_article[] @relation("finance_articleTofinance_article")
+
+  @@ignore
+}
+
+model project_note_accesses {
+  id              String        @id @db.Uuid
+  company_id      String        @db.Uuid
+  project_note_id String        @db.Uuid
+  user_id         String?       @db.Uuid
+  role            String?       @db.VarChar(32)
+  created_at      DateTime?     @db.Timestamp(0)
+  updated_at      DateTime?     @db.Timestamp(0)
+  companies       Company       @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_note_accesses_company_id_foreign")
+  project_notes   project_notes @relation(fields: [project_note_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_note_accesses_project_note_id_foreign")
+  users           User?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_note_accesses_user_id_foreign")
+
+  @@unique([project_note_id, role], map: "project_note_accesses_project_note_id_role_unique")
+  @@unique([project_note_id, user_id], map: "project_note_accesses_project_note_id_user_id_unique")
+  @@index([company_id, project_note_id], map: "project_note_accesses_company_id_project_note_id_index")
+  @@ignore
+}
+
+model activity_log {
+  id                BigInt    @id @default(autoincrement())
+  log_name          String?   @db.VarChar(255)
+  description       String
+  subject_type      String?   @db.VarChar(255)
+  subject_id        String?   @db.Uuid
+  event             String?   @db.VarChar(255)
+  causer_type       String?   @db.VarChar(255)
+  causer_id         String?   @db.Uuid
+  attribute_changes Json?     @db.Json
+  properties        Json?     @db.Json
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+
+  @@index([log_name], map: "activity_log_log_name_index")
+  @@index([causer_type, causer_id], map: "causer")
+  @@index([subject_type, subject_id], map: "subject")
+  @@ignore
+}
+
+model applications {
+  id                    String    @id @db.Uuid
+  name                  String    @db.VarChar(255)
+  phone                 String    @db.VarChar(255)
+  tariff                String?   @db.VarChar(255)
+  personal_data_consent Boolean   @default(false)
+  status                String    @default("new") @db.VarChar(255)
+  ip                    String?   @db.Inet
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+  marketing_consent     Boolean   @default(false)
+
+  @@index([status], map: "applications_status_index")
+  @@ignore
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement())
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String
+  queue      String
+  payload    String
+  exception  String
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+
+  @@ignore
+}
+
+model jobs {
+  id           BigInt @id @default(autoincrement())
+  queue        String @db.VarChar(255)
+  payload      String
+  attempts     Int    @db.SmallInt
+  reserved_at  Int?
+  available_at Int
+  created_at   Int
+
+  @@index([queue], map: "jobs_queue_index")
+  @@ignore
+}
+
+model knowledge_base_article_accesses {
+  id                      String                  @id @db.Uuid
+  company_id              String                  @db.Uuid
+  article_id              String                  @db.Uuid
+  user_id                 String?                 @db.Uuid
+  role                    String?                 @db.VarChar(255)
+  created_at              DateTime?               @db.Timestamp(0)
+  updated_at              DateTime?               @db.Timestamp(0)
+  knowledge_base_articles knowledge_base_articles @relation(fields: [article_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_article_accesses_article_id_foreign")
+  companies               Company                 @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_article_accesses_company_id_foreign")
+  users                   User?                   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "knowledge_base_article_accesses_user_id_foreign")
+
+  @@unique([article_id, role], map: "knowledge_base_article_accesses_article_id_role_unique")
+  @@unique([article_id, user_id], map: "knowledge_base_article_accesses_article_id_user_id_unique")
+  @@ignore
+}
+
+model project_note_images {
+  id              String        @id @db.Uuid
+  company_id      String        @db.Uuid
+  project_note_id String        @db.Uuid
+  disk            String        @default("project_note_images") @db.VarChar(64)
+  path            String        @db.VarChar(1024)
+  original_name   String        @db.VarChar(255)
+  mime_type       String?       @db.VarChar(255)
+  size            BigInt        @default(0)
+  uploaded_by     String?       @db.Uuid
+  created_at      DateTime?     @db.Timestamp(0)
+  updated_at      DateTime?     @db.Timestamp(0)
+  companies       Company       @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_note_images_company_id_foreign")
+  project_notes   project_notes @relation(fields: [project_note_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_note_images_project_note_id_foreign")
+  users           User?         @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "project_note_images_uploaded_by_foreign")
+
+  @@index([project_note_id, created_at], map: "project_note_images_note_created_idx")
+  @@ignore
+}
+
+model task_attachments {
+  id            String    @id @db.Uuid
+  company_id    String    @db.Uuid
+  task_id       String    @db.Uuid
+  path          String    @db.VarChar(1024)
+  original_name String    @db.VarChar(255)
+  mime_type     String?   @db.VarChar(255)
+  size          BigInt    @default(0)
+  uploaded_by   String?   @db.Uuid
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  companies     Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_attachments_company_id_foreign")
+  tasks         Task      @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_attachments_task_id_foreign")
+  users         User?     @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction, map: "task_attachments_uploaded_by_foreign")
+
+  @@index([task_id, created_at], map: "task_attachments_task_created_idx")
+  @@ignore
+}
+
+model template_task_status_columns {
+  id          String    @id @db.Uuid
+  template_id String    @db.Uuid
+  name        String    @db.VarChar(255)
+  slug        String    @db.VarChar(255)
+  color       String?   @db.VarChar(32)
+  position    Int       @default(1)
+  is_default  Boolean   @default(false)
+  is_final    Boolean   @default(false)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  templates   templates @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "template_task_status_columns_template_id_foreign")
+
+  @@unique([template_id, position], map: "template_task_status_columns_template_id_position_unique")
+  @@unique([template_id, slug], map: "template_task_status_columns_template_id_slug_unique")
+  @@ignore
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  WORKER
+  SUPERADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum JobStatus {
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}

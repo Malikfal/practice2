@@ -1,0 +1,35 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 15 106 60" xml:space="preserve">
+  <defs>
+<!--Градиент верхней ленты (светло-серый)-->
+    <linearGradient id="grad-top" gradientUnits="userSpaceOnUse" x1="52.7304" y1="106.8799" x2="45.8276" y2="97.8743" gradientTransform="matrix(1 0 0 -1 0 140.89)">
+      <stop offset="0" stop-color="#E6E6E6"/>
+      <stop offset="1" stop-color="#B3B3B3"/>
+    </linearGradient>
+<!--Градиент средней ленты, левая часть-->
+    <linearGradient id="grad-mid1" gradientUnits="userSpaceOnUse" x1="41.8685" y1="100.8027" x2="35.0532" y2="90.9965" gradientTransform="matrix(1 0 0 -1 0 140.89)">
+      <stop offset="0" stop-color="#B8B8B8"/>
+      <stop offset="1" stop-color="#808080"/>
+    </linearGradient>
+<!--Градиент средней ленты, правая часть-->
+    <linearGradient id="grad-mid2" gradientUnits="userSpaceOnUse" x1="86.8253" y1="127.8054" x2="50.9337" y2="86.9266" gradientTransform="matrix(1 0 0 -1 0 140.89)">
+      <stop offset="0" stop-color="#999999"/>
+      <stop offset="1" stop-color="#4D4D4D"/>
+    </linearGradient>
+<!--Градиент нижней ленты (темно-серый / графит)-->
+    <linearGradient id="grad-bot" gradientUnits="userSpaceOnUse" x1="54.5117" y1="109.9016" x2="28.3867" y2="80.162" gradientTransform="matrix(1 0 0 -1 0 140.89)">
+      <stop offset="0" stop-color="#4D4D4D"/>
+      <stop offset="1" stop-color="#1A1A1A"/>
+    </linearGradient>
+  </defs>
+<!--Сами слои птички-->
+  <g clip-path="url(#clip-bounds)">
+<!--Верхний (бывший белый)-->
+    <path fill="url(#grad-top)" d="M56.3,58.9C43.7,47.3,35.2,31.7,24.1,31c16.4-12.7,40,5.1,49.5,13.4C76.2,46.8,61,63.1,56.3,58.9z"/>
+<!--Средний левый (бывший синий 1)-->
+    <path fill="url(#grad-mid1)" d="M57.2,69.3C35.4,61.7,23.9,36,9.1,36c20-16.9,54.6,13.8,54.6,13.8L57.2,69.3z"/>
+<!--Средний правый (бывший синий 2)-->
+    <path fill="url(#grad-mid2)" d="M53.2,48.6c-7.4,0.9-14.9-3.1-22.2-7.1c16.3,17.8,36.1,25.6,52.4,10.8c8.8-13.1,13.2-28.8,20.7-29.6C86.2,8.6,75.2,46,53.2,48.6z"/>
+<!--Нижний (бывший красный)-->
+    <path fill="url(#grad-bot)" d="M57.7,69.9c12-1.4,19.8-9,25.6-17.6 C67,67.1,51.5,54.4,30.9,41.5c-5.7-3.1-11.4-6.3-17.1-7.2c-2.6-0.3-5.2-0.2-7.7,0.4c-1.9,0.6-3.7,1.5-5.3,2.7 c-0.3,0.2-0.6,0.5-0.7,0.9C0,38.7-0.1,39.1,0,39.4c0.1,0.4,0.3,0.7,0.6,1c0.3,0.3,0.6,0.5,1,0.5C16.8,44.5,30.2,73.1,57.7,69.9z"/>
+  </g>
+</svg>
