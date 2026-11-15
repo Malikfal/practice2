@@ -3,12 +3,12 @@
 ## 🛠️ Технологический стек
 
 **Мобильная разработка:**
-*   [React Native](https://reactnative.dev/) (фреймворк для кроссплатформенной разработки)
-*   [Expo](https://expo.dev/) (SDK и инструменты для сборки)
-*   [Expo Router](https://docs.expo.dev/router/introduction/) (файловая навигация)
-*   [TypeScript](https://www.typescriptlang.org/) (строгая типизация)
-*   [Axios](https://axios-http.com/) (HTTP-клиент для работы с API)
-*   [React Context API](https://react.dev/reference/react/useContext) (управление глобальным состоянием пользователя)
+*   [React Native](https://reactnative.dev/)
+*   [Expo](https://expo.dev/)
+*   [Expo Router](https://docs.expo.dev/router/introduction/)
+*   [TypeScript](https://www.typescriptlang.org/)
+*   [Axios](https://axios-http.com/)
+*   [React Context API](https://react.dev/reference/react/useContext)
 
 **Бэкенд (внешний сервис компании):**
 
