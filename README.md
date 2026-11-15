@@ -10,8 +10,7 @@
 *   [Axios](https://axios-http.com/) (HTTP-клиент для работы с API)
 *   [React Context API](https://react.dev/reference/react/useContext) (управление глобальным состоянием пользователя)
 
-**Бэкенд (внешний сервис):**
-*   Laravel (PHP), PostgreSQL, Docker (API развернуто отдельно и используется в качестве источника данных).
+**Бэкенд (внешний сервис компании):**
 
 ## 📂 Архитектура проекта
 
