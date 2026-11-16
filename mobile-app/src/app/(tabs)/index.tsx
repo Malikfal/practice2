@@ -1,9 +1,10 @@
 import api from '@/services/api';
 import { homeStyles as styles } from '@/styles/homeStyles';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -13,6 +14,9 @@ export default function HomeScreen() {
   const [totalSeconds, setTotalSeconds] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const formatTime = (totalSeconds: number) => {
     const h = Math.floor(totalSeconds / 3600);
@@ -27,11 +31,10 @@ export default function HomeScreen() {
       const currentUser = profileRes.data.data || profileRes.data;
       setUserData(currentUser);
 
-      const today = new Date();
-      const fromDate = today.toISOString().split('T')[0];
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const toDate = tomorrow.toISOString().split('T')[0];
+      const fromDate = selectedDate.toISOString().split('T')[0];
+      const nextDay = new Date(selectedDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const toDate = nextDay.toISOString().split('T')[0];
 
       const [boardRes, timelineRes] = await Promise.all([
         api.get('/tasks/board'),
@@ -52,8 +55,6 @@ export default function HomeScreen() {
       setTasks(allTasks);
 
       const timelineData = timelineRes.data.data || timelineRes.data || {};
-      
-      // Берем данные напрямую из ответа бэкенда
       setSegments(timelineData.segments || []);
       setTotalSeconds(timelineData.total_seconds || 0);
 
@@ -65,15 +66,22 @@ export default function HomeScreen() {
     }
   };
 
+  // Добавляем selectedDate в зависимости, чтобы данные перезапрашивались при смене даты
   useFocusEffect(
     useCallback(() => {
       fetchDashboardData();
-    }, [])
+    }, [selectedDate])
   );
 
   const onRefresh = () => {
     setRefreshing(true);
     fetchDashboardData();
+  };
+
+  // Обработчик выбора даты
+  const onDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (date) setSelectedDate(date);
   };
 
   if (isLoading) {
@@ -113,11 +121,34 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <Text style={styles.sectionTitle}>Мой день</Text>
+          {/* Заголовок "Мой день" с кнопкой выбора даты */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 15 }}>
+            <Text style={[styles.sectionTitle, { marginBottom: 0, marginTop: 0 }]}>Мой день</Text>
+            <TouchableOpacity 
+              style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, elevation: 1, borderWidth: 1, borderColor: '#eee' }}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Ionicons name="calendar-outline" size={16} color="#0055ff" style={{ marginRight: 5 }} />
+              <Text style={{ color: '#0055ff', fontWeight: 'bold', fontSize: 14 }}>
+                {selectedDate.toLocaleDateString('ru-RU')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={onDateChange}
+              maximumDate={new Date()}
+            />
+          )}
+
           {segments.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Ionicons name="time-outline" size={40} color="#ccc" />
-              <Text style={styles.emptyText}>За сегодня нет отработанных сегментов</Text>
+              <Text style={styles.emptyText}>За этот день нет отработанных сегментов</Text>
             </View>
           ) : (
             segments.map((seg: any, index: number) => {
