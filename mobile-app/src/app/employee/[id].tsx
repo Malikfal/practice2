@@ -2,9 +2,10 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import { employeeDetailStyles as styles } from '@/styles/employeeDetailStyles';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function EmployeeDetailScreen() {
   const router = useRouter();
@@ -17,11 +18,13 @@ export default function EmployeeDetailScreen() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loadingAssignments, setLoadingAssignments] = useState(true);
   
-  // Стейты для Дня сотрудника
   const [daySegments, setDaySegments] = useState<any[]>([]);
   const [dayTotalSeconds, setDayTotalSeconds] = useState(0);
   const [loadingDay, setLoadingDay] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const canManage = hasPermission('employees.create_update');
   const canManageProjects = hasPermission('project.members.manage');
@@ -32,11 +35,10 @@ export default function EmployeeDetailScreen() {
         const assignRes = await api.get(`/project-assignment-histories/by-user/${id}`);
         setAssignments(assignRes.data.data || assignRes.data || []);
 
-        const today = new Date();
-        const fromDate = today.toISOString().split('T')[0];
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const toDate = tomorrow.toISOString().split('T')[0];
+        const fromDate = selectedDate.toISOString().split('T')[0];
+        const nextDay = new Date(selectedDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const toDate = nextDay.toISOString().split('T')[0];
 
         const dayRes = await api.get('/reports/day-timeline', {
           params: { from: fromDate, to: toDate, user_id: id }
@@ -55,7 +57,7 @@ export default function EmployeeDetailScreen() {
     };
 
     if (id) fetchData();
-  }, [id]);
+  }, [id, selectedDate]);
 
   const handleResetPassword = () => {
     const newPassword = Math.random().toString(36).slice(-8);
@@ -153,9 +155,44 @@ export default function EmployeeDetailScreen() {
       )}
 
 
-      <View style={styles.dayHeader}>
-        <Text style={styles.sectionTitle}>День сотрудника (Сегодня)</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, marginTop: 10 }}>
+        <Text style={styles.sectionTitle}>День сотрудника</Text>
+        
+        <TouchableOpacity 
+          style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 8, borderRadius: 8, elevation: 2 }}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Ionicons name="calendar-outline" size={18} color="#0055ff" style={{ marginRight: 5 }} />
+          <Text style={{ color: '#0055ff', fontWeight: 'bold' }}>
+            {selectedDate.toLocaleDateString('ru-RU')}
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowDatePicker(Platform.OS === 'ios');
+            if (date) setSelectedDate(date);
+          }}
+        />
+      )}
+
+      {canManage && (
+        <TouchableOpacity 
+          style={{ backgroundColor: '#0055ff', flexDirection: 'row', padding: 12, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginBottom: 15 }}
+          onPress={() => router.push({ 
+            pathname: '/employee/add-time', 
+            params: { employeeId: id, employeeName: `${firstName} ${lastName}` } 
+          })}
+        >
+          <Ionicons name="add-circle-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Добавить время вручную</Text>
+        </TouchableOpacity>
+      )}
       
       {loadingDay ? (
         <ActivityIndicator size="small" color="#0055ff" style={{ marginBottom: 20 }} />

@@ -23,6 +23,7 @@ export default function CreateTaskScreen() {
       await api.post(`/projects/${projectId}/tasks`, {
         title: title,
         description: description,
+        is_draft: false,
       });
 
       Alert.alert('Успех', 'Задача успешно создана!');

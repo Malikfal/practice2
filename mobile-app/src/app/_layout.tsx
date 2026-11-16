@@ -67,6 +67,14 @@ export default function RootLayout() {
           title: 'Назначение на проект' 
         }} 
       />
+
+      <Stack.Screen 
+        name="employee/add-time" 
+        options={{ 
+          presentation: 'modal', 
+          title: 'Добавить время' 
+        }} 
+      />
       </Stack>
     </AuthProvider>
   );
