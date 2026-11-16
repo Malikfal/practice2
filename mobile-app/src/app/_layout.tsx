@@ -51,6 +51,22 @@ export default function RootLayout() {
           title: 'Добавить в проект' 
         }} 
       />
+
+      <Stack.Screen 
+        name="employee/[id]" 
+        options={{ 
+          title: 'Профиль сотрудника',
+          headerBackTitle: 'Назад'
+        }} 
+      />
+
+      <Stack.Screen 
+        name="employee/add-assignment" 
+        options={{ 
+          presentation: 'modal', 
+          title: 'Назначение на проект' 
+        }} 
+      />
       </Stack>
     </AuthProvider>
   );

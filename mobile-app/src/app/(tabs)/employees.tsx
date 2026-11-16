@@ -63,7 +63,24 @@ export default function EmployeesScreen() {
         keyExtractor={(item: any) => item.id.toString()}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => (
-          <View style={styles.employeeCard}>
+          <TouchableOpacity 
+            style={styles.employeeCard}
+            onPress={() => {
+              router.push({
+                pathname: '/employee/[id]',
+                params: { 
+                  id: item.id, 
+                  firstName: item.first_name || '', 
+                  lastName: item.last_name || '', 
+                  email: item.email || '', 
+                  role: item.role_label || item.role || '',
+                  position: item.position || '',
+                  phone: item.phone || '',
+                  birthday: item.birthday || '',
+                }
+              });
+            }}
+          >
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
                 {item.first_name ? item.first_name[0] : item.name?.[0] || 'U'}
@@ -77,7 +94,7 @@ export default function EmployeesScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
